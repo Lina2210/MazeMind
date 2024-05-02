@@ -1,0 +1,32 @@
+{
+  "name": "mazemind",
+  "version": "1.0.0",
+  "description": "MazeMind",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/server/server.js",
+    "run": "npm run dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Marcelogr04/MazeMind.git"
+  },
+  "author": "Marcelo y Lina",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Marcelogr04/MazeMind/issues"
+  },
+  "homepage": "https://github.com/Marcelogr04/MazeMind#readme",
+  "dependencies": {
+    "@firebase/app": "^0.10.1",
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "express": "^4.19.0",
+    "firebase": "^10.11.0",
+    "mysql": "^2.18.1",
+    "socket.io": "^4.7.5",
+    "socket.io-client": "^4.7.5"
+  }
+}

@@ -1,5 +1,5 @@
 # Carpeta node_modules generada por npm
-node_modules/
+node_modules/*
 
 # Archivos y directorios generados por npm
 package-lock.json

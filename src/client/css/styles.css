@@ -1,0 +1,99 @@
+/* Register Form */
+
+#register-form {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #000;
+    color: #fff;
+    padding: 20px;
+    border: 2px solid #fff;
+    border-radius: 5px;
+    width: 300px;
+    height: auto;
+    margin: 20px auto;
+    text-align: center;
+}
+
+#register-form h1 {
+    margin-bottom: 20px;
+}
+
+#register-form input[type="text"],
+#register-form input[type="email"],
+#register-form input[type="password"],
+#register-button,
+#register-form a {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 16px;
+    padding: 8px;
+    margin: 5px 0;
+    width: calc(100% - 16px);
+    box-sizing: border-box;
+    border: 2px solid #fff;
+    background-color: transparent;
+    color: #fff;
+    text-decoration: none;
+    display: inline-block;
+}
+
+#register-button {
+    cursor: pointer;
+}
+
+#register-button:hover,
+#register-form a:hover {
+    background-color: #fff;
+    color: #000;
+}
+
+/* Login Form */
+
+#login-form {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #000;
+    color: #fff;
+    padding: 20px;
+    border: 2px solid #fff;
+    border-radius: 5px;
+    width: 300px;
+    height: auto;
+    margin: 20px auto;
+    text-align: center;
+}
+
+#login-form h1 {
+    margin-bottom: 20px;
+}
+
+#login-form input[type="text"],
+#login-form input[type="email"],
+#login-form input[type="password"],
+#login-button,
+#login-form a {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 16px;
+    padding: 8px;
+    margin: 5px 0;
+    width: calc(100% - 16px);
+    box-sizing: border-box;
+    border: 2px solid #fff;
+    background-color: transparent;
+    color: #fff;
+    text-decoration: none;
+    display: inline-block;
+}
+
+#login-button {
+    cursor: pointer;
+}
+
+#login-button:hover,
+#login-form a:hover {
+    background-color: #fff;
+    color: #000;
+}

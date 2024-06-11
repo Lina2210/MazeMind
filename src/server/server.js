@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const mysql = require('mysql');
 const app = express();
+const session = require('express-session');
 const server = http.createServer(app);
 require('dotenv').config();
 
@@ -14,7 +15,18 @@ const bcrypt = require('bcrypt');
 
 app.use(bodyParser.json());
 // Middleware para permitir solicitudes CORS
-app.use(cors());
+app.use(cors({
+  origin: 'http://127.0.0.1:5500',
+  credentials: true
+}));
+
+// configuración de express-session
+app.use(session({
+    secret: 'UnaCadenaAleatoriaYUnica123',
+    resave: true,
+    saveUninitialized: true,
+    cookie: { secure: false } // Si se cambia a true, la cookie solo se enviará si la conexión es HTTPS
+}));
 
 const connection = mysql.createConnection({
   host: process.env.DB_HOST,
@@ -33,8 +45,16 @@ connection.connect((err) => {
 
 // Ruta para generar y enviar el laberinto
 app.get('/generar-laberinto', (req, res) => {
-    const mazeWidth = 53;
-    const mazeHeight = 31;
+    const mazeWidth = 29;
+    const mazeHeight = 17;
+    const maze = generateMaze(mazeWidth, mazeHeight);
+    res.json({ maze });
+});
+
+// Función para generar el laberinto
+app.get('/generar-laberinto', (req, res) => {
+    const mazeWidth = 28;
+    const mazeHeight = 16;
     const maze = generateMaze(mazeWidth, mazeHeight);
     res.json({ maze });
 });
@@ -50,7 +70,7 @@ function generateMaze(width, height) {
     }
 
     // Establecer entrada en el borde superior izquierdo (0, 0)
-    //maze[1][0] = 2;
+    maze[1][0] = 3;
 
     // Establecer salida en el borde inferior derecho
     maze[height - 2][width - 1] = 2;
@@ -112,29 +132,71 @@ function generateMaze(width, height) {
 }
 
 app.post('/register', (req, res) => {
-    // Obtener los datos del usuario del cuerpo de la solicitud
     const { username, email, password } = req.body;
 
-    // Hashear el password antes de insertarlo en la base de datos
     bcrypt.hash(password, 10, (err, hash) => {
         if (err) {
             console.error('Error al hashear el password:', err);
-            res.status(500).json({ error: 'Error al hashear el password' });
-            return;
+            return res.status(500).json({ error: 'Error interno del servidor' });
         }
 
-        // Insertar los datos del usuario en la base de datos con el password hasheado
         connection.query('INSERT INTO Users (username, email, password_hash) VALUES (?, ?, ?)', [username, email, hash], (err, result) => {
             if (err) {
+                if (err.code === 'ER_DUP_ENTRY') {
+                    if (err.sqlMessage.includes('Users.username')) {
+                        return res.status(400).json({ error: '¡Ups! Parece que alguien más ya tiene ese nombre de usuario. ¿Qué te parece probar con otro?' });
+                    } else if (err.sqlMessage.includes('Users.email')) {
+                        return res.status(400).json({ error: '¡Ups! Parece que ese correo electrónico ya está en uso. ¿Podrías intentar con otro?' });
+                    }
+                }
                 console.error('Error al registrar el usuario:', err);
-                res.status(500).json({ error: 'Error al registrar el usuario' });
-                return;
+                return res.status(500).json({ error: 'Error al registrar el usuario' });
             }
             console.log('Usuario registrado correctamente');
-            res.json({ message: 'Usuario registrado correctamente' });
+            return res.status(200).json({ message: '¡Genial! ¡Tu cuenta ha sido creada con éxito! ¡Bienvenido!"' });
         });
     });
 });
+
+
+app.post('/login', (req, res) => {
+    const { usernameLogin, passwordLogin } = req.body;
+
+    connection.query('SELECT * FROM Users WHERE username = ? or email = ?' , [usernameLogin, usernameLogin], (err, results) => {
+        if (err) {
+            console.error('Error al buscar el usuario:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+
+        if (results.length === 0) {
+            return res.status(400).json({ error: '¡Ups! Parece que ese nombre de usuario no existe. ¿Podrías revisarlo?' });
+        }
+
+        const user = results[0];
+        bcrypt.compare(passwordLogin, user.password_hash, (err, result) => {
+            if (err) {
+                console.error('Error al comparar las contraseñas:', err);
+                return res.status(500).json({ error: 'Error interno del servidor' });
+            }
+
+            if (!result) {
+                return res.status(400).json({ error: '¡Oh no! La contraseña no es correcta. ¿Podrías revisarla?' });
+            }
+            //Almacenar el nombre de usuario en la sesión
+            req.session.username = user.username;
+            return res.status(200).json({ message: '¡Hola ' + user.username + '!', username: user.username  });
+        });
+    });
+});
+
+
+//ruta para cerrar sesión
+app.get('/logout', (req, res) => {
+    req.session.destroy();
+    localStorage.clear();
+    res.redirect('/');
+});
+
 
 // Inicia el servidor en el puerto 3000
 app.listen(PORT, () => {

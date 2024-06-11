@@ -1,4 +1,3 @@
-import { initRegisterForm } from './register.js';
 export default class Menu extends Phaser.Scene {
     constructor() {
         super('menu');
@@ -7,91 +6,125 @@ export default class Menu extends Phaser.Scene {
     preload() {
         // Cargar los recursos necesarios para el menú
         this.load.path = './assets/';
-        this.load.image('backgorund-menu', 'backgorund-menu.jpg');
+        this.load.image('backgorund-menu', 'fondoMenu.png');
+        this.load.image('title-image', 'titulo.png');
     }
 
     create() {
         // IMAGEN FONDO
-        this.add.image(960, 540, 'backgorund-menu').setScale(1.4);
+        this.add.image(960, 540, 'backgorund-menu').setScale(1);
 
         // TITULO
-        const title = this.add.text(960, 180, 'MazeMind', {
-            fontSize: '150px',
-            fill: '#0D7205'
-        }).setOrigin(0.5);
+        this.add.image(960, 180, 'title-image').setOrigin(0.5);
 
         // BOTONES
         // Boton para iniciar partida
-        const buttonRegister = this.add.text(960, 420, 'Registrarse', {
-            fontSize: '40px',
-            fill: '#fff'
-        }).setOrigin(0.5);
-        const buttonStart = this.add.text(960, 480, 'Nueva Partida', {
-            fontSize: '40px',
-            fill: '#fff'
-        }).setOrigin(0.5);
+        
+       // Definir el estilo común para los botones
+        const buttonStyle = {
+            fontSize: '45px',
+            fill: '#ffffff',
+            fontWeight: 'extra-bold',
+            
+            //fontFamily: 'Arial'
+        };
 
-        // Boton para continuar partida
-        const buttonContinue = this.add.text(960, 540, 'Continuar Partida', {
-            fontSize: '40px',
-            fill: '#fff'
-        }).setOrigin(0.5);
+        // Verificar si el usuario está registrado
+        const username = localStorage.getItem('username');
+        let buttonLogin;
+        let buttonLogout;
 
-        // Boton para cambiar personaje
-        const buttonSkins = this.add.text(960, 600, 'Personajes', {
-            fontSize: '40px',
-            fill: '#fff'
-        }).setOrigin(0.5);
+        if (username) {
+            buttonLogin = this.add.text(1700, 75, `${username}`, buttonStyle).setOrigin(0.6);
+            buttonLogin.on('pointerdown', () => {
+                this.scene.start('userPerfil'); // Mostrar la pantalla de usuario o cualquier otra escena
+            });
+            buttonLogout = this.add.text(1700, 100, 'Cerrar Sesión', buttonStyle).setOrigin(0.6);   
+            buttonLogout.setFontSize(25);
+            buttonLogout.on('pointerdown', () => {
+                this.logout(); // Cerrar sesión
+            });
 
-        // Boton para como jugar
-        const buttonHelp = this.add.text(960, 660, 'Cómo Jugar', {
-            fontSize: '40px',
-            fill: '#fff'
-        }).setOrigin(0.5);
+        } else {
+            buttonLogin = this.add.text(1700, 75, 'Iniciar Sesión', buttonStyle).setOrigin(0.6);
+            buttonLogin.on('pointerdown', () => {
+                this.scene.start('login'); // Mostrar la escena de login
+            });
+        }
 
-        // Boton para opiones
-        const buttonOptions = this.add.text(960, 720, 'Opciones', {
-            fontSize: '40px',
-            fill: '#fff'
-        }).setOrigin(0.5);
+        buttonLogin.setFontSize(25);
+       
 
-        // CONFIGURAR BOTONES
-        buttonRegister.setInteractive().on('pointerdown', () => {
-            // Inicializar el formulario de registro
-            initRegisterForm();
+        const buttonRegister = this.add.text(960, 590, 'Registrarse', buttonStyle).setOrigin(0.5);
+        const buttonStart = this.add.text(960, 670, 'Nueva Partida', buttonStyle).setOrigin(0.5);
+        const buttonHelp = this.add.text(960, 750, 'Cómo Jugar', buttonStyle).setOrigin(0.5);
+        const buttonOptions = this.add.text(960, 830, 'Opciones', buttonStyle).setOrigin(0.5);
 
+        // Función para animar el botón al agrandarlo y cambiar su color
+        const enlargeButton = (button) => {
+            button.setScale(1.1); // Escalar el botón al 110%
+            button.setFill('#07F60A'); // Cambiar el color del texto a dorado
+        }
+
+        // Función para animar el botón al reducirlo y restaurar su color original
+        const shrinkButton = (button) => {
+            button.setScale(1); // Restaurar la escala original
+            button.setFill('#fff'); // Restaurar el color original del texto
+        }
+
+        // Aplicar interactividad y animaciones a los botones
+        const buttons = [buttonRegister, buttonStart, buttonHelp, buttonOptions];
+        
+        if (buttonLogin) {
+            buttons.push(buttonLogin);
+        }
+        if (buttonLogout) {
+            buttons.push(buttonLogout);
+        }
+
+        
+        buttons.forEach(button => {
+            button.setInteractive();
+
+            // Animar el botón al agrandarlo y cambiar su color cuando el cursor se coloca sobre él
+            button.on('pointerover', () => {
+                enlargeButton(button);
+            });
+
+            // Animar el botón al reducirlo y restaurar su color original cuando el cursor sale del botón
+            button.on('pointerout', () => {
+                shrinkButton(button);
+            });
         });
 
+        // Configurar eventos de clic para cada botón
+    
+        buttonRegister.on('pointerdown', () => {
+            // Inicializar el formulario de registro
+            //initRegisterForm();
+            this.scene.start('registro'); // Mostrar la escena de registro
+        });
 
-        // Configuracion del evento del botón para iniciar la partida
-        buttonStart.setInteractive().on('pointerdown', () => {
+        buttonStart.on('pointerdown', () => {
             this.scene.start('game'); // Mostrar la escena del juego
         });
 
-        // Configuracion del evento del botón para continuar la partida
-        buttonContinue.setInteractive().on('pointerdown', () => {
-            this.scene.start('continueGame'); // Mostrar la escena de continuar juego
+        buttonHelp.on('pointerdown', () => {
+            this.scene.start('help'); // Mostrar la escena de cómo jugar
         });
 
-        // Configuracion el evento del botón para entrar en personajes
-        buttonSkins.setInteractive().on('pointerdown', () => {
-            this.scene.start('skins'); // Mostrar la escena de personajes
-            
-
-        });
-
-        // Configuracion del evento del botón para como jugar
-        buttonHelp.setInteractive().on('pointerdown', () => {
-            this.scene.start('help'); // Mostrar la escena de como jugar
-        });
-
-        // Configuracion el evento del botón para entrar en opciones
-        buttonOptions.setInteractive().on('pointerdown', () => {
+        buttonOptions.on('pointerdown', () => {
             this.scene.start('options'); // Mostrar la escena de opciones
         });
-
+        
     }
     update() {
 
+    }
+
+    //hacer logout
+    logout() {
+        localStorage.removeItem('username');
+        this.scene.start('menu');
     }
 }

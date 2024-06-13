@@ -199,16 +199,16 @@ app.get('/logout', (req, res) => {
 
 //guardar puntuacion en la base de datos
 app.post('/saveScore', (req, res) => {
-    const { username, score, timeElapsed } = req.body;
+    const { username, score, levelDificult} = req.body;
 
     const query = `
-        INSERT INTO Games (user_id, score)
-        SELECT user_id, ?
+        INSERT INTO Games (user_id, score, levelDificult)
+        SELECT user_id, ?, ?
         FROM Users
         WHERE username = ?
     `;
 
-    connection.query(query, [score, username], (err, result) => {
+    connection.query(query, [score, levelDificult, username], (err, result) => {
         if (err) {
             console.error('Error al guardar la puntuación:', err);
             return res.status(500).json({ error: 'Error interno del servidor' });
@@ -220,21 +220,20 @@ app.post('/saveScore', (req, res) => {
 
 // Ruta para obtener puntajes del usuario actual
 app.get('/scores', (req, res) => {
-    console.log("entro al get scores")
     const username = req.query.username; // Recibe el nombre de usuario desde Phaser
-    console.log(username)
+    
     // Consulta SQL para obtener los puntajes del usuario
     const sql = `
-        SELECT Games.score, Games.created_at
+        SELECT Games.score, Games.levelDificult, Games.created_at
         FROM Games
         JOIN Users ON Games.user_id = Users.user_id
-        WHERE Users.username = 'Thiago'
+        WHERE Users.username = ?
         ORDER BY Games.score DESC
     `;
 
     connection.query(sql, [username], (err, results) => {
         if (err) {
-        throw err;
+            throw err;
         }
         res.json(results); // Envía los resultados como JSON
     });

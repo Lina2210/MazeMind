@@ -51,7 +51,6 @@ export default class MazeCreateExperto extends Phaser.Scene {
         
         
         this.events.once('mazeCreateExperto', () => {
-            console.log("Laberinto creado, creando jugador");
             // Establecer los límites de la cámara según las dimensiones del laberinto
             this.cameras.main.setBounds(0, 0, 1856, 1088);//esto se modifica pra limitar la camara
             // Hacer que la cámara siga al jugador
@@ -89,9 +88,7 @@ export default class MazeCreateExperto extends Phaser.Scene {
         fetch('http://localhost:3000/generar-laberinto')
             .then(response => response.json())
             .then(data => {
-                console.log("Datos del laberinto recibidos:", data);
                 const maze = data.maze;
-                console.log(maze)
                 if (this.layer) {
                     this.layer.destroy(); // Elimina el laberinto anterior
                 }
@@ -108,9 +105,8 @@ export default class MazeCreateExperto extends Phaser.Scene {
     
         if (this.layer) {
             this.layer.setCollisionByExclusion([-1]);
-            console.log("Colisiones establecidas en la capa");
         } else {
-            console.error("Error: no se pudo crear la capa");
+            //console.error("Error: no se pudo crear la capa");
         }
         this.events.emit('mazeCreateExperto');
     }
@@ -118,7 +114,6 @@ export default class MazeCreateExperto extends Phaser.Scene {
     //crear jugador
     createPlayer() {
         this.skin = this.physics.add.sprite(100, 100, 'skin'); 
-        console.log(this.skin)
         this.skin.setScale(1.5);
         this.skin.setDepth(1);
 
@@ -165,11 +160,7 @@ export default class MazeCreateExperto extends Phaser.Scene {
         
         if (timer.sec > 0 || timer.min > 0) {
             timer.sec--;
-            console.log('timer.sec:', timer.sec);
-            console.log('timer.min:', timer.min);
             if (timer.sec <= 5 && timer.min === 0 || timer.min === '0' && timer.sec <= '5') {
-                console.log('entro al segundo if countdown');
-                console.log('estoy en el primer laberinto');
                 this.showMazeChangeWarning();
             }
             if (timer.sec < 0) {
@@ -180,10 +171,8 @@ export default class MazeCreateExperto extends Phaser.Scene {
             this.updateText();
 
             // Mostrar advertencia 5 segundos antes de cambiar el laberinto
-            
-            
+             
         } else {
-            console.log('¡Tiempo terminado!');
             this.transitionMazeChange();
         }
     }
@@ -317,6 +306,7 @@ export default class MazeCreateExperto extends Phaser.Scene {
             if (this.container) {
                 this.container.remove();
             }
+            
             this.scene.stop('mazeCreateExperto');
             this.scene.start('mastermind');
         }, 5000);
@@ -324,21 +314,23 @@ export default class MazeCreateExperto extends Phaser.Scene {
         //guardar puntuacion en la base de datos
 
         const username = localStorage.getItem('username');
+        const levelDificult = 'Experto';
         if (username) {
             fetch('http://localhost:3000/saveScore', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, score })
+                body: JSON.stringify({ username, score, levelDificult })
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Puntuación guardada:', data);
+                    console.log('Success:', data);
+                    
                 })
                 .catch(error => console.error('Error:', error));
         } else {
-            console.error('No se pudo guardar la puntuación: no hay un usuario registrado');
+            console.error('Error: no se encontró el nombre de usuario en el almacenamiento local');
         }
 
 

@@ -1,6 +1,7 @@
 export default class UserPerfil extends Phaser.Scene {
     constructor() {
         super('userPerfil');
+        this.tableContainer = null; // Inicializa la propiedad para contener el contenedor de la tabla
     }
 
     preload() {
@@ -26,10 +27,10 @@ export default class UserPerfil extends Phaser.Scene {
         }).setOrigin(0.5);
 
         // Crear la tabla para mostrar los puntajes
-        const table = this.createScoreTable();
+        this.tableContainer = this.createScoreTable(); // Guarda la referencia al contenedor de la tabla
 
         // Obtener los puntajes del usuario
-        this.getScores(username, table);
+        this.getScores(username);
 
         // Botón para volver al menú
         const backButton = this.add.text(100, 980, 'Volver', {
@@ -39,35 +40,44 @@ export default class UserPerfil extends Phaser.Scene {
 
         // Configurar el evento del botón para volver al menú
         backButton.setInteractive().on('pointerdown', () => {
-            table.remove(); // Eliminar la tabla antes de volver al menú
+            if (this.tableContainer) {
+                this.tableContainer.remove(); // Eliminar la tabla y el contenedor del DOM
+            }
             this.scene.start('menu'); // Muestrar la escena del menú
         });
     }
 
     createScoreTable() {
         // Crear la tabla HTML para mostrar los puntajes
+        const tableContainer = document.createElement('div');
+        tableContainer.id = 'scores-table';
+
         const table = document.createElement('table');
-        table.id = 'scores-table';
-        table.style.color = '#000';
-        table.style.fontSize = '24px';
-        table.style.margin = 'auto';
-        document.body.appendChild(table); // Agregar la tabla al DOM
-        return table;
+        table.style.width = '100%'; // Asegura que la tabla ocupe el 100% del contenedor
+        table.style.borderCollapse = 'collapse'; // Colapsa los bordes de la tabla
+
+        tableContainer.appendChild(table); // Agregar la tabla al contenedor
+        document.body.appendChild(tableContainer); // Agregar el contenedor al DOM
+        return tableContainer; // Devuelve el contenedor para guardar la referencia
     }
 
-    getScores(username, table) {
+    getScores(username) {
         // Obtener los puntajes del usuario desde el servidor
         fetch(`http://localhost:3000/scores?username=${username}`)
             .then(response => response.json())
             .then(scores => {
                 // Mostrar los puntajes en la tabla
-                this.displayScores(scores, table);
+                this.displayScores(scores);
             })
             .catch(error => console.error('Error al obtener los puntajes:', error));
     }
     
-    displayScores(scores, table) {
+    displayScores(scores) {
         // Limpiar la tabla antes de agregar nuevos puntajes
+        const table = this.tableContainer.querySelector('table');
+        if (!table) {
+            return;
+        }
         table.innerHTML = '';
 
         // Crear la fila de encabezado
@@ -75,6 +85,9 @@ export default class UserPerfil extends Phaser.Scene {
         const scoreHeader = document.createElement('th');
         scoreHeader.textContent = 'Puntaje';
         headerRow.appendChild(scoreHeader);
+        const levelHeader = document.createElement('th');
+        levelHeader.textContent = 'Nivel';
+        headerRow.appendChild(levelHeader);
         const createdAtHeader = document.createElement('th');
         createdAtHeader.textContent = 'Fecha';
         headerRow.appendChild(createdAtHeader);
@@ -84,6 +97,8 @@ export default class UserPerfil extends Phaser.Scene {
             const row = table.insertRow();
             const scoreCell = row.insertCell();
             scoreCell.textContent = score.score;
+            const levelCell = row.insertCell();
+            levelCell.textContent = score.levelDificult;
             const createdAtCell = row.insertCell();
             createdAtCell.textContent = new Date(score.created_at).toLocaleString();
         });

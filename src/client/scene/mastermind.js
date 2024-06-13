@@ -5,6 +5,10 @@ export default class Mastermind extends Phaser.Scene {
 
 preload(){
 		
+	// Carga la imagen de fondo
+	this.load.image('background', './assets/fondoMasterMind.jpg');
+
+	
 	//make a spritesheet with 7 colour circles for your guesses; first colour is blank/grey	
 		this.load.spritesheet('colours', './assets/coloursb.png', {
 			frameWidth: 54,
@@ -16,22 +20,36 @@ preload(){
 			frameHeight: 27
 		});
 		//enter button
-		this.load.image('enter', './assets/muro.png');
+		this.load.image('enter', './assets/checkBoton.png');
+
 		
+	// Cargar la música de fondo
+	//this.load.audio('backgroundMusica', './assets/mastermind.mp3');
 	
 	}
 
 create(){
 
+	// Añadir la música de fondo y configurarla
+	/*this.backgroundMusic = this.sound.add('backgroundMusica', { loop: true, volume: 0.5 });
+	this.backgroundMusic.play();*/
+
+	// Establece el tamaño del juego en 800x800
+    //this.scale.setGameSize(1200, 800);
+
     // Centra la cámara principal en la escena
     this.cameras.main.centerOn(400, 400);
 
-	// Establece el color de fondo deseado (en formato hexadecimal)
-    const backgroundColor =  0x8b8c7a;
+	// Agrega la imagen de fondo 
+	const background = this.add.image(400, 400, 'background');
 
-    // Establece el color de fondo de la cámara principal
-    this.cameras.main.setBackgroundColor(backgroundColor);
+	// Ajusta la imagen al tamaño del juego
+	background.setDisplaySize(1856, 1088); 
 
+	// Botón para mute/unmute
+	/*const mutedMusicButton = this.add.text(20, 20, 'Silenciar Música', { font: '20px Arial', fill: '#ffffff' }).setInteractive();
+	mutedMusicButton.on('pointerdown', () => this.mutedMusic());
+*/
 	//secret code:4 digit code from 6 possible : you could change this to an array of 6 
 		this.code = [];
 		for (let i = 0; i < 4; i++) {
@@ -44,10 +62,8 @@ create(){
 			// Push the unique random number to the code array
 			this.code.push(randomNumber);
 		}
-	//logging out the code generated 
-	console.log("code is " + this.code);
-		
-		//this has 8 rows allowed for guesses. the x and y positions are determined here by where I wanted them, but you can change these
+			
+	//this has 8 rows allowed for guesses. the x and y positions are determined here by where I wanted them, but you can change these
 	//row8 HECHO
 	this.group8 = this.add.group();
 	let positions =[{x: 200, y:200}, {x:265, y:200}, {x:330, y:200}, {x:395, y:200}];
@@ -237,15 +253,13 @@ create(){
 		let row1Sprites = this.group1.getChildren();
 		//get frame number of each item in row and store in array
 				for(let sprite of row1Sprites) {
-					console.log(sprite)
 					let num = sprite.frame.name;
        				 this.guess.push(num);
 				}
-		console.log("my guess is" + this.guess);	
-			//check the array doesn't contain '0' (empty)
+		//check the array doesn't contain '0' (empty)
 		if(this.guess.includes(0)){
 			//throw error
-			alert("you haven't finished your guess for this row");//esto hay que cambiarlo por un pop up
+			this.error("El código está incompleto. Debes completar los  cuatro colores.");//esto hay que cambiarlo por un pop up
 		}
 		else{
 		//lock row from being used again
@@ -261,7 +275,6 @@ create(){
 	}	
 	checkCode1(){
 		//log guess and check with code (optional)
-		console.log("this guess" + this.guess + "this code" + this.code);
 
 				if(JSON.stringify(this.guess) === JSON.stringify(this.code))
 				{
@@ -273,6 +286,7 @@ create(){
 				}
 	}
 
+	
 	getHints1(){
 		this.hintsarray = [];
 		//compare numbers in array to see if there are right colours in right places:
@@ -293,7 +307,6 @@ create(){
 	}
 	update1(){
 		//optional log out. 
-		console.log("this hint array is: " + this.hintsarray);
 		
 		for(var i in this.hint1){
 			if(this.hintsarray[i] ===1){
@@ -304,6 +317,7 @@ create(){
 			}
 		}
 		this.group2.getChildren().forEach(function(item){
+			
 				item.setInteractive();
 	});
 		
@@ -316,15 +330,13 @@ create(){
 		let row2Sprites = this.group2.getChildren();
 		//get frame number of each item in row and store in array
 				for(let sprite of row2Sprites) {
-					console.log(sprite)
 					let num = sprite.frame.name;
        				this.guess.push(num);
 				}
-		console.log("my guess is" + this.guess);	
 			//check the array doesn't contain '0' (empty)
 		if(this.guess.includes(0)){
 			//throw error
-			alert("you haven't finished your guess for this row"); //esto hay que cambiarlo por un pop up
+			this.error("El código está incompleto. Debes completar los  cuatro colores."); //esto hay que cambiarlo por un pop up
 		}
 		else{
 		//lock row from being used again
@@ -368,9 +380,7 @@ create(){
 		this.update2();
 	}
 	update2(){
-		
-		console.log("this hint array is: " + this.hintsarray);
-		
+				
 		for(var i in this.hint2){
 			if(this.hintsarray[i] ===1){
 				this.hint2[i].setFrame(1);
@@ -393,15 +403,13 @@ create(){
 		let row3Sprites = this.group3.getChildren();
 		//get frame number of each item in row and store in array
 				for(let sprite of row3Sprites) {
-					console.log(sprite)
 					let num = sprite.frame.name;
-       				 this.guess.push(num);
+       				this.guess.push(num);
 				}
-		console.log("my guess is" + this.guess);	
 			//check the array doesn't contain '0' (empty)
 		if(this.guess.includes(0)){
 			//throw error
-			alert("you haven't finished your guess for this row");//esto hay que cambiarlo por un pop up
+			this.error("El código está incompleto. Debes completar los  cuatro colores.");
 		}
 		else{
 		//lock row from being used again
@@ -445,9 +453,7 @@ create(){
 		this.update3();
 	}
 	update3(){
-		
-		console.log("this hint array is: " + this.hintsarray);
-		
+				
 		for(var i in this.hint3){
 			if(this.hintsarray[i] ===1){
 				this.hint3[i].setFrame(1);
@@ -471,15 +477,13 @@ create(){
 		let row4Sprites = this.group4.getChildren();
 		//get frame number of each item in row and store in array
 				for(let sprite of row4Sprites) {
-					console.log(sprite)
 					let num = sprite.frame.name;
-       				 this.guess.push(num);
+       				this.guess.push(num);
 				}
-		console.log("my guess is" + this.guess);	
 			//check the array doesn't contain '0' (empty)
 		if(this.guess.includes(0)){
 			//throw error
-			alert("you haven't finished your guess for this row"); //esto hay que cambiarlo por un pop up
+			this.error("El código está incompleto. Debes completar los  cuatro colores.");
 		}
 		else{
 		//lock row from being used again
@@ -523,9 +527,7 @@ create(){
 		this.update4();
 	}
 	update4(){
-		
-		console.log("this hint array is: " + this.hintsarray);
-		
+				
 		for(var i in this.hint4){
 			if(this.hintsarray[i] ===1){
 				this.hint4[i].setFrame(1);
@@ -548,15 +550,13 @@ create(){
 		let row5Sprites = this.group5.getChildren();
 		//get frame number of each item in row and store in array
 				for(let sprite of row5Sprites) {
-					console.log(sprite)
 					let num = sprite.frame.name;
-       				 this.guess.push(num);
+       				this.guess.push(num);
 				}
-		console.log("my guess is" + this.guess);	
 			//check the array doesn't contain '0' (empty)
 		if(this.guess.includes(0)){
 			//throw error
-			alert("you haven't finished your guess for this row"); //esto hay que cambiarlo por un pop up
+			this.error("El código está incompleto. Debes completar los  cuatro colores.");
 		}
 		else{
 		//lock row from being used again
@@ -600,9 +600,7 @@ create(){
 		this.update5();
 	}
 	update5(){
-		
-		console.log("this hint array is: " + this.hintsarray);
-		
+				
 		for(var i in this.hint5){
 			if(this.hintsarray[i] ===1){
 
@@ -623,15 +621,13 @@ create(){
 		let row6Sprites = this.group6.getChildren();
 		//get frame number of each item in row and store in array
 				for(let sprite of row6Sprites) {
-					console.log(sprite)
 					let num = sprite.frame.name;
        				 this.guess.push(num);
 				}
-		console.log("my guess is" + this.guess);	
-			//check the array doesn't contain '0' (empty)
+		//check the array doesn't contain '0' (empty)
 		if(this.guess.includes(0)){
 			//throw error
-			alert("you haven't finished your guess for this row"); //esto hay que cambiarlo por un pop up
+			this.error("El código está incompleto. Debes completar los  cuatro colores.");
 		}
 		else{
 		//lock row from being used again
@@ -674,9 +670,7 @@ create(){
 		this.update6();
 	}
 	update6(){
-		
-		console.log("this hint array is: " + this.hintsarray);
-		
+				
 		for(var i in this.hint6){
 			if(this.hintsarray[i] ===1){
 				this.hint6[i].setFrame(1);
@@ -699,15 +693,13 @@ create(){
 		let row7Sprites = this.group7.getChildren();
 		//get frame number of each item in row and store in array
 				for(let sprite of row7Sprites) {
-					console.log(sprite)
 					let num = sprite.frame.name;
-       				 this.guess.push(num);
+       				this.guess.push(num);
 				}
-		console.log("my guess is" + this.guess);	
 			//check the array doesn't contain '0' (empty)
 		if(this.guess.includes(0)){
 			//throw error
-			alert("you haven't finished your guess for this row"); //esto hay que cambiarlo por un pop up
+			this.error("El código está incompleto. Debes completar los  cuatro colores.");
 		}
 		else{
 		//lock row from being used again
@@ -751,9 +743,7 @@ create(){
 		this.update7();
 	}
 	update7(){
-		
-		console.log("this hint array is: " + this.hintsarray);
-		
+				
 		for(var i in this.hint7){
 			if(this.hintsarray[i] ===1){
 				this.hint7[i].setFrame(1);
@@ -776,15 +766,13 @@ create(){
 		let row8Sprites = this.group8.getChildren();
 		//get frame number of each item in row and store in array
 				for(let sprite of row8Sprites) {
-					console.log(sprite)
 					let num = sprite.frame.name;
-       				 this.guess.push(num);
+       				this.guess.push(num);
 				}
-		console.log("my guess is" + this.guess);	
-			//check the array doesn't contain '0' (empty)
+		//check the array doesn't contain '0' (empty)
 		if(this.guess.includes(0)){
 			//throw error
-			alert("you haven't finished your guess for this row");
+			this.error("El código está incompleto. Debes completar los  cuatro colores.");
 		}
 		else{
 		//lock row from being used again
@@ -830,9 +818,7 @@ create(){
 	}
 	
 	update8(){
-		
-		console.log("this hint array is: " + this.hintsarray);
-		
+				
 		for(var i in this.hint8){
 			if(this.hintsarray[i] ===1){
 				this.hint8[i].setFrame(1);
@@ -847,24 +833,135 @@ create(){
 		
 	}
 
-	puzzWin(){
+	puzzWin() {
+		const successText = document.createElement('p');
+		const successMessage = '¡FELICIDADES, GANASTE!';
+		successText.textContent = successMessage;
+		successText.style.cssText = `
+			position: fixed;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			background-color: #28a745;
+			color: #fff;
+			font-size: 28px;
+			font-weight: bold;
+			padding: 20px 40px;
+			border-radius: 10px;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+			text-align: center;
+			z-index: 1000;
+			opacity: 0;
+			transition: opacity 0.5s ease;
+		`;
+		document.body.appendChild(successText);
 	
-		console.log("You win!");
-		this.scene.start('menu')
-	}
+		setTimeout(() => {
+			successText.style.opacity = 1;
+		}, 0);
 	
-	gameOver(){
-		console.log(" over");
-		this.scene.start('menu')
-	}
-	
-	error(){
-		
-		console.log("error");
-		
+		setTimeout(() => {
+			successText.style.opacity = 0;
+			setTimeout(() => {
+				successText.remove();
+				this.scene.start('menu')
+			}, 500);
+		}, 4000);
 		
 	}
 
+	gameOver() {
+		const overText = document.createElement('p');
+		const overMessage = '¡OH NO, PERDISTE!';
+		overText.textContent = overMessage;
+		overText.style.cssText = `
+			position: fixed;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			background-color: #dc3545;
+			color: #fff;
+			font-size: 28px;
+			font-weight: bold;
+			padding: 20px 40px;
+			border-radius: 10px;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+			text-align: center;
+			z-index: 1000;
+			opacity: 0;
+			transition: opacity 0.5s ease;
+		`;
+		document.body.appendChild(overText);
+	
+		setTimeout(() => {
+			overText.style.opacity = 1;
+		}, 0);
+	
+		setTimeout(() => {
+			overText.style.opacity = 0;
+			setTimeout(() => {
+				overText.remove();
+				this.scene.start('menu')
+			}, 500);
+		}, 4000);
+		
+	}
+	
+	error(mensaje) {
+		const errorText = document.createElement('p');
+		const errorMessage = mensaje;
+		errorText.textContent = errorMessage;
+		errorText.style.cssText = `
+			position: fixed;
+			left: 50%;
+			top: 20%;
+			transform: translate(-50%, -50%);
+			background-color: #ffc107;
+			color: #fff;
+			font-size: 24px;
+			font-weight: bold;
+			padding: 15px 30px;
+			border-radius: 10px;
+			border: 2px solid #fff;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+			text-align: center;
+			z-index: 1000;
+			opacity: 0;
+			transition: opacity 0.5s ease;
+		`;
+		document.body.appendChild(errorText);
+	
+		setTimeout(() => {
+			errorText.style.opacity = 1;
+		}, 0);
+	
+		setTimeout(() => {
+			errorText.style.opacity = 0;
+			setTimeout(() => {
+				errorText.remove();
+			}, 500);
+		}, 7000);
+	}
+
+	/*mutedMusic() {
+        if (this.backgroundMusic.volume > 0) {
+            this.backgroundMusic.setVolume(0);
+            this.scene.sound.mute = true;
+            this.updateMutedButton('Unmute Music');
+        } else {
+            this.backgroundMusic.setVolume(0.5);
+            this.scene.sound.mute = false;
+            this.updateMutedButton('Mute Music');
+        }
+    }
+
+    updateMutedButton(text) {
+        const mutedMusicButton = this.children.getByName('mutedMusicButton');
+        if (mutedMusicButton) {
+            mutedMusicButton.text = text;
+        }
+    }
+*/
 
 update(){}
     

@@ -108,11 +108,16 @@
     background-color: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente */
     border-radius: 5px;
     padding: 10px;
-    max-height: 300px; /* Altura máxima de la tabla, ajusta según sea necesario */
+    width: 50%;
+    max-height: 50%; /* Altura máxima de la tabla, ajusta según sea necesario */
     overflow-y: auto; /* Agrega un scrollbar vertical si la tabla es muy larga */
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Sombra para resaltar la tabla */
     z-index: 100; /* Asegura que la tabla esté encima de otros elementos */
   }
+  #scores-table table {
+    width: 100%; /* Asegura que la tabla ocupe el 100% del ancho del contenedor */
+    border-collapse: collapse; /* Colapsa los bordes de la tabla */
+}
   
   #scores-table th,
   #scores-table td {
@@ -126,4 +131,12 @@
     color: #000;
 }
 
+/* Estilo tipo cebra para las filas */
+#scores-table tr:nth-child(even) {
+    background-color: #e9e9e9; /* Color de fondo para las filas pares */
+}
+
+#scores-table tr:nth-child(odd) {
+    background-color: #fff; /* Color de fondo para las filas impares */
+}
   

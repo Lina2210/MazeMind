@@ -96,9 +96,7 @@ export default class MazeCreateDesafio extends Phaser.Scene {
         fetch('http://localhost:3000/generar-laberinto')
             .then(response => response.json())
             .then(data => {
-                console.log("Datos del laberinto recibidos:", data);
                 const maze = data.maze;
-                console.log(maze)
                 if (this.layer) {
                     this.layer.destroy(); // Elimina el laberinto anterior
                 }
@@ -115,9 +113,8 @@ export default class MazeCreateDesafio extends Phaser.Scene {
     
         if (this.layer) {
             this.layer.setCollisionByExclusion([-1]);
-            console.log("Colisiones establecidas en la capa");
         } else {
-            console.error("Error: no se pudo crear la capa");
+            // Error al cargar la capa del laberinto
         }
         this.events.emit('mazeCreatedDesafio');
         
@@ -184,14 +181,17 @@ export default class MazeCreateDesafio extends Phaser.Scene {
     createEnemies(emptyCells) {
         const enemigos = this.physics.add.group({
             key: 'enemigo',
-            repeat: 1,
+            repeat: 6,
             scale: { x: 2.5, y: 2.5 },
             setXY: { x: 0, y: 0 }  // Inicialmente, las coordenadas pueden ser 0, 0
-        }).setDepth(1); 
+        }).setDepth(1);
+        
+        
+        
         enemigos.children.iterate((enemigo) => {
             const cell = this.getRandomEmptyCell(emptyCells);
-            enemigo.x = cell.x * gameOptions.tileSize * 2; // Ajustar por el escalado de la capa
-            enemigo.y = cell.y * gameOptions.tileSize * 2; // Ajustar por el escalado de la capa
+            enemigo.x = (cell.x + 0.1) * gameOptions.tileSize * 2; // Ajustar por el escalado de la capa
+            enemigo.y = (cell.y + 0.1) * gameOptions.tileSize * 2; // Ajustar por el escalado de la capa
         }
         );
 
@@ -253,8 +253,7 @@ export default class MazeCreateDesafio extends Phaser.Scene {
         
         if (timer.sec > 0 || timer.min > 0) {
             timer.sec--;
-            console.log('timer.sec:', timer.sec);
-            console.log('timer.min:', timer.min);
+            
             if (timer.sec <= 5 && timer.min === 0 || timer.min === '0' && timer.sec <= '5') {
                 this.showMazeChangeWarning();
             }
@@ -269,7 +268,7 @@ export default class MazeCreateDesafio extends Phaser.Scene {
             
             
         } else {
-            console.log('¡Tiempo terminado!');
+            
             this.transitionMazeChange();
         }
     }
@@ -394,13 +393,14 @@ export default class MazeCreateDesafio extends Phaser.Scene {
         //guardar puntuacion en la base de datos
 
         const username = localStorage.getItem('username');
+        const levelDificult = 'Desafio';
         if (username) {
             fetch('http://localhost:3000/saveScore', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ username, score })
+                body: JSON.stringify({ username, score, levelDificult })
             })
                 .then(response => response.json())
                 .then(data => {

@@ -16,9 +16,16 @@ export default class MenuNiveles extends Phaser.Scene {
 
         // TITULO
         this.add.text(960, 200, 'NIVELES DE JUEGO', {
-            fontSize: '36px',
+            fontSize: '48px',
             fill: '#fff'
         }).setOrigin(0.5);
+
+        if (!localStorage.getItem('username')) {
+            this.add.text(960, 400, '¡Importante! Para que tu puntaje quede guardado, asegúrate de estar registrado.', {
+                fontSize: '36px',
+                fill: '#ffff00'
+            }).setOrigin(0.5);
+        }
 
         // BOTONES
         // Boton para iniciar partida

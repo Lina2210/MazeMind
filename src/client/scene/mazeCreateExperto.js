@@ -6,19 +6,16 @@ var gameOptions = {
 var text;
 var timer = {
     min: '0',
-    sec: '25'
+    sec: '45'
 }
 var timeGame = { ...timer };
-let live = 2;
+let live = 3;
 let score = 0; // Variable para la puntuación
-let mazeChangeWarningText;
-let warningTimerEvent;
-let warningInterval;
-export default class MazeCreate extends Phaser.Scene {
-    constructor() {
-        super('mazeCreate');
-    }
 
+export default class MazeCreateExperto extends Phaser.Scene {
+    constructor() {
+        super('mazeCreateExperto');
+    }
     layer;
     skin;
     
@@ -32,42 +29,39 @@ export default class MazeCreate extends Phaser.Scene {
             frameWidth: 32,
             frameHeight: 32
         });
+
+        this.load.image('life', './heart.png');
         this.load.image('mask', './mask1.png'); //PRUEBA MASK
 
         
     }
 
-    create() {    
+    create() {   
+        timer = { min: '0', sec: '45' };
+        live = 3;
+        score = 0; 
         this.fetchMaze();
-
         this.rt = this.add.renderTexture(0, 0, this.scale.width, this.scale.height);
 
-//  Make sure it doesn't scroll with the camera
+        //  Make sure it doesn't scroll with the camera
         this.rt.setOrigin(0, 0);
         this.rt.setScrollFactor(0, 0);
 
         this.createPlayer();
         
         
-        this.events.once('mazeCreated', () => {
+        this.events.once('mazeCreateExperto', () => {
+            console.log("Laberinto creado, creando jugador");
             // Establecer los límites de la cámara según las dimensiones del laberinto
             this.cameras.main.setBounds(0, 0, 1856, 1088);//esto se modifica pra limitar la camara
-            
-            
             // Hacer que la cámara siga al jugador
             this.cameras.main.startFollow(this.skin, true, 0.1, 0.1);
         });
 
-        text = this.add.text(850, 40, '2:00', {
+        text = this.add.text(850, 40, '0:45', {
             fontSize: '50px',
             fill: '#ffffff'
-        }).setDepth(0.1).setScrollFactor(0);
-        
-        // Añadir texto de advertencia de cambio
-        mazeChangeWarningText = this.add.text(this.scale.width / 2, this.scale.height / 2, '"¡Alerta! ¡El laberinto cambiará pronto! ', {
-            fontSize: '70px',
-            fill: 'red'
-        }).setOrigin(0.5).setScrollFactor(0).setDepth(1).setVisible(false);
+        }).setDepth(1).setScrollFactor(0);
 
         this.time.addEvent({
             delay: 1000,
@@ -77,22 +71,25 @@ export default class MazeCreate extends Phaser.Scene {
             }
         });
 
-        
-        // Añadir texto para mostrar la puntuación
-        this.scoreText = this.add.text(this.scale.width - 20, 20, `Score: ${score}`, {
-            fontSize: '20px',
-            fill: '#ffffff'
-        }).setOrigin(1, 0).setScrollFactor(0);
-        this.scoreText.setDepth(1);
-        this.updateScoreText();
+        // Inicializar las vidas del jugador
+        this.lives = [];
 
-        
+        for (let i = 0; i < live; i++) {
+            const life = this.add.image(50 + i * 100, 80, 'life');
+            life.setScale(4);
+            life.setScrollFactor(0);
+            life.setDepth(1);
+            this.lives.push(life);
+        }
+                    
     }
 
+    //obtener matriz del servidor para generar el laberinto
     fetchMaze() {
         fetch('http://localhost:3000/generar-laberinto')
             .then(response => response.json())
             .then(data => {
+                console.log("Datos del laberinto recibidos:", data);
                 const maze = data.maze;
                 console.log(maze)
                 if (this.layer) {
@@ -103,21 +100,28 @@ export default class MazeCreate extends Phaser.Scene {
             .catch(error => console.error('Error al obtener el laberinto:', error));
     }
     
+    //generar el laberinto
     createTilemapFromMaze(maze) {
-    
         const tilemap = this.make.tilemap({ data: maze, tileWidth: gameOptions.tileSize, tileHeight: gameOptions.tileSize });
         const tileset = tilemap.addTilesetImage('tiles');
         this.layer = tilemap.createLayer(0, tileset, 0, 0).setScale(2);
-
-        this.events.emit('mazeCreated');
-        
+    
+        if (this.layer) {
+            this.layer.setCollisionByExclusion([-1]);
+            console.log("Colisiones establecidas en la capa");
+        } else {
+            console.error("Error: no se pudo crear la capa");
+        }
+        this.events.emit('mazeCreateExperto');
     }
 
+    //crear jugador
     createPlayer() {
         this.skin = this.physics.add.sprite(100, 100, 'skin'); 
         console.log(this.skin)
         this.skin.setScale(1.5);
         this.skin.setDepth(1);
+
         if (this.skin.texture && this.skin.texture.key === 'skin') {
             this.skin.anims.create({
                 key: 'skin_down',
@@ -145,8 +149,6 @@ export default class MazeCreate extends Phaser.Scene {
             console.error('Error al cargar la textura del jugador.');
         }
     
-        this.physics.add.collider(this.skin, this.layer);
-    
         this.cursors = this.input.keyboard.createCursorKeys();
         this.wKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
         this.aKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -155,64 +157,67 @@ export default class MazeCreate extends Phaser.Scene {
     }
 
     updateText() {
+        
         text.setText(timer.min + ':' + (timer.sec >= 10 ? timer.sec : '0' + timer.sec));
     }
 
     countDown() {
+        
         if (timer.sec > 0 || timer.min > 0) {
             timer.sec--;
+            console.log('timer.sec:', timer.sec);
+            console.log('timer.min:', timer.min);
+            if (timer.sec <= 5 && timer.min === 0 || timer.min === '0' && timer.sec <= '5') {
+                console.log('entro al segundo if countdown');
+                console.log('estoy en el primer laberinto');
+                this.showMazeChangeWarning();
+            }
             if (timer.sec < 0) {
                 timer.sec = 59;
                 timer.min--;
             }
+            
             this.updateText();
 
             // Mostrar advertencia 5 segundos antes de cambiar el laberinto
-            if (timer.sec <= 5 && timer.min === 0) {
-                this.showMazeChangeWarning();
-            }
+            
+            
         } else {
             console.log('¡Tiempo terminado!');
             this.transitionMazeChange();
         }
     }
 
-    
-
     showMazeChangeWarning() {
-        mazeChangeWarningText.setVisible(true);
-        this.tweens.add({
-            targets: mazeChangeWarningText,
-            alpha: 0,
-            yoyo: true,
-            repeat: 4,
-            duration: 500,
-            onComplete: () => {
-                mazeChangeWarningText.setVisible(false);
-            }
-        });
+        const message = "¡Alerta! ¡El laberinto cambiará pronto!";
+        const warningContainer = this.createMessageContainer(message, 'yellow', 'black');
+        this.animateBlinking(warningContainer);
     }
 
+    
+
     transitionMazeChange() {
-        // Desvanecer el laberinto actual
-        this.cameras.main.fadeOut(2000, 0, 0, 0, () => {
-            this.fetchMaze();
-            this.skin.setPosition(100, 100);
-            timer.min = 0;
-            timer.sec = '15';
-            this.cameras.main.fadeIn(2000, 0, 0, 0);
-        });
+        live--;
+
         if (live > 0) {
-            live --;
-        } else {
+            this.lives[live].setVisible(false);
+        }
+
+        if (live === 0) {
             this.gameOver();
+        } else {
+            // Desvanecer el laberinto actual
+            this.cameras.main.fadeOut(2000, 0, 0, 0, () => {
+                this.fetchMaze();
+                this.skin.setPosition(100, 100);
+                timer.min = 0;
+                timer.sec = '45';
+                this.cameras.main.fadeIn(2000, 0, 0, 0);
+            });
         }
     }
 
-    updateScoreText() {
-        this.scoreText.setText(`Score: ${score}`);
-    }
-
+    
     update() {
 
 
@@ -271,11 +276,11 @@ export default class MazeCreate extends Phaser.Scene {
         
         const cam = this.cameras.main;
         
-//  Clear the RenderTexture
+        //  Clear the RenderTexture
         this.rt.clear();
 
         //  Fill it in black
-       // this.rt.fill(0x000000, 0.9);
+        this.rt.fill(0x000000);
         this.rt.depth = 1;
         
         //  Erase the 'mask' texture from it based on the player position
@@ -290,39 +295,98 @@ export default class MazeCreate extends Phaser.Scene {
     }
 
     gameOver() {
-        this.add.text(this.scale.width / 2, this.scale.height / 2, 'Fin de la partida.', {
-            fontSize: '50px',
-            fill: 'red'
-        }).setOrigin(0.5);
-        this.updateScoreText();
+        this.container = this.createMessageContainer('Fin de la partida', 'red', 'white');
         this.scene.pause();
 
         setTimeout(() => {
-            const gameScene = this.scene.get('game');
-            if (gameScene) {
-                gameScene.restartMazeScene();
+            if (this.container) {
+                this.container.remove();
             }
+            this.scene.stop('mazeCreateExperto');
+            this.scene.start('menu');
         }, 2000);
     }
 
     gameFinish() {
         let timeBonus = (timer.min * 60 + timer.sec) * 10; // Bonificación por tiempo restante
         score += timeBonus + (live * 100); // Sumar bonificación de tiempo y vidas
-        text = this.add.text(this.scale.width / 2, this.scale.height / 2, `Winner\nScore: ${score}`, {
-            fontSize: '50px',
-            fill: '#ffffff'
-        }).setDepth(0.1).setOrigin(0.5);
-        this.updateScoreText();
+        this.container = this.createMessageContainer('Ganaste ' + score + ' puntos. Pero continua el desafio.', 'green', 'white');
+        
         this.scene.pause();
         setTimeout(() => {
-            this.scene.stop('mazeCreate');
+            if (this.container) {
+                this.container.remove();
+            }
+            this.scene.stop('mazeCreateExperto');
             this.scene.start('mastermind');
         }, 5000);
 
+        //guardar puntuacion en la base de datos
+
+        const username = localStorage.getItem('username');
+        if (username) {
+            fetch('http://localhost:3000/saveScore', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, score })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Puntuación guardada:', data);
+                })
+                .catch(error => console.error('Error:', error));
+        } else {
+            console.error('No se pudo guardar la puntuación: no hay un usuario registrado');
+        }
+
+
         
     }
+    createMessageContainer(message, backColor, color) {
+        const messageContainer = document.createElement('div');
+        messageContainer.textContent = message;
+        
 
+        messageContainer.style.cssText = `
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: ${backColor};
+            color: ${color};
+            padding: 10px;
+            border: 2px solid #fff;
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
+            font-size: 24px;
+            z-index: 1000; /* Asegurar que esté encima de otros elementos */
+        `;
+        
+        document.body.appendChild(messageContainer);
+        return messageContainer;
+    }
     
+    animateBlinking(container) {
+        let isVisible = true;
+        const blinkInterval = setInterval(() => {
+            if (isVisible) {
+                container.style.visibility = 'hidden';
+                isVisible = false;
+            } else {
+                container.style.visibility = 'visible';
+                isVisible = true;
+            }
+        }, 500);
+    
+        // Detener la animación después de 1 segundo
+        setTimeout(() => {
+            clearInterval(blinkInterval);
+            document.body.removeChild(container); // Eliminar el mensaje del cuerpo del documento
+        }, 1000);
+    }
 }
 
 

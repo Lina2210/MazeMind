@@ -12,7 +12,7 @@ export default class Menu extends Phaser.Scene {
 
     create() {
         // IMAGEN FONDO
-        this.add.image(960, 540, 'backgorund-menu').setScale(1);
+        //this.add.image(960, 540, 'backgorund-menu').setScale(1);
 
         // TITULO
         this.add.image(960, 180, 'title-image').setOrigin(0.5);
@@ -106,7 +106,7 @@ export default class Menu extends Phaser.Scene {
         });
 
         buttonStart.on('pointerdown', () => {
-            this.scene.start('game'); // Mostrar la escena del juego
+            this.scene.start('menuNiveles'); // Mostrar la escena del juego
         });
 
         buttonHelp.on('pointerdown', () => {

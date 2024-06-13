@@ -97,3 +97,33 @@
     background-color: #fff;
     color: #000;
 }
+
+
+/* Estilos CSS para la tabla */
+#scores-table {
+    position: absolute;
+    top: 30%; /* Ajusta la posición vertical según sea necesario */
+    left: 50%; /* Centra la tabla horizontalmente */
+    transform: translateX(-50%); /* Centra la tabla horizontalmente */
+    background-color: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente */
+    border-radius: 5px;
+    padding: 10px;
+    max-height: 300px; /* Altura máxima de la tabla, ajusta según sea necesario */
+    overflow-y: auto; /* Agrega un scrollbar vertical si la tabla es muy larga */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Sombra para resaltar la tabla */
+    z-index: 100; /* Asegura que la tabla esté encima de otros elementos */
+  }
+  
+  #scores-table th,
+  #scores-table td {
+    padding: 8px;
+    border-bottom: 1px solid #ddd; /* Borde inferior de las celdas */
+    text-align: center; /* Alinea el texto al centro */
+  }
+  
+  #scores-table th {
+    background-color: #f2f2f2; /* Color de fondo para las celdas del encabezado */
+    color: #000;
+}
+
+  

@@ -5,8 +5,6 @@ export default class Mastermind extends Phaser.Scene {
 
 preload(){
 		
-	
-	
 	//make a spritesheet with 7 colour circles for your guesses; first colour is blank/grey	
 		this.load.spritesheet('colours', './assets/coloursb.png', {
 			frameWidth: 54,
@@ -24,9 +22,6 @@ preload(){
 	}
 
 create(){
-
-	// Establece el tamaño del juego en 800x800
-    this.scale.setGameSize(800, 800);
 
     // Centra la cámara principal en la escena
     this.cameras.main.centerOn(400, 400);
@@ -855,10 +850,12 @@ create(){
 	puzzWin(){
 	
 		console.log("You win!");
+		this.scene.start('menu')
 	}
 	
 	gameOver(){
 		console.log(" over");
+		this.scene.start('menu')
 	}
 	
 	error(){

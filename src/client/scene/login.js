@@ -147,6 +147,13 @@ export default class Login extends Phaser.Scene {
         // Configurar el evento del botón para volver al menú
         backButton.setInteractive().on('pointerdown', () => {
             form.remove();
+            if (errorMessage) {
+                errorMessage.remove();
+                errorMessage = null;
+            } else if (successMessage) {
+                successMessage.remove();
+                successMessage = null;
+            }
             this.scene.start('menu'); // Muestrar la escena del menú
             
         });

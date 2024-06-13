@@ -15,7 +15,11 @@ export default class Game extends Phaser.Scene {
         //this.add.image(500, 500, 'floor-loby').setScale(5);
         
         
-        this.startNewMazeScene();
+        if (!this.scene.get('mazeCreate')) {
+            this.scene.add('mazeCreate', MazeCreate, true);
+        } else {
+            this.scene.start('mazeCreate');
+        }
     
       
         
@@ -24,24 +28,5 @@ export default class Game extends Phaser.Scene {
     update() {
         
     }
-    generateUniqueKey(baseKey) {
-        return `${baseKey}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    }
-
-    startNewMazeScene() {
-        // Generar una nueva clave única y arrancar la nueva escena
-        const uniqueSceneKey = this.generateUniqueKey('mazeCreate');
-        this.currentMazeKey = uniqueSceneKey;
-        this.scene.add(uniqueSceneKey, MazeCreate, true);
-    }
-
-    restartMazeScene() {
-        if (this.currentMazeKey) {
-            // Detener la escena actual
-            this.scene.stop(this.currentMazeKey);
-            this.scene.remove(this.currentMazeKey);
-            // Iniciar una nueva escena
-            this.startNewMazeScene();
-        }
-    }
+    
 }

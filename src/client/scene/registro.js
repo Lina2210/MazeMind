@@ -1,6 +1,8 @@
 export default class Registro extends Phaser.Scene {
     constructor() {
         super('registro');
+        this.errorText = null;
+        this.successText = null;
     }
 
     preload() {
@@ -112,44 +114,58 @@ export default class Registro extends Phaser.Scene {
         // Configurar el evento del botón para volver al menú
         backButton.setInteractive().on('pointerdown', () => {
             form.remove();
-            this.scene.start('menu'); // Muestrar la escena del menú
-            
+            // Eliminar mensajes de error o éxito si existen
+            if (this.errorText) {
+                this.errorText.remove();
+                this.errorText = null;
+            }
+            if (this.successText) {
+                this.successText.remove();
+                this.successText = null;
+            }
+            this.scene.start('menu');
         });
     }
-
 
     update() {
         // Update logic for your scene
     }
 
     displayError(errorMessage) {
-        const errorText = document.createElement('p');
-        errorText.textContent = errorMessage;
-        errorText.style.cssText = `
-        position: absolute;
-        left: 50%;
-        top: 10%;
-        transform: translate(-50%, 0);
-        background-color: #ff0000;
-        color: #fff;
-        padding: 10px;
-        border: 2px solid #fff;
-        border-radius: 5px;
-        width: 300px;
-        text-align: center;
+        if (this.errorText) {
+            this.errorText.remove();
+        }
+        this.errorText = document.createElement('p');
+        this.errorText.textContent = errorMessage;
+        this.errorText.style.cssText = `
+            position: absolute;
+            left: 50%;
+            top: 10%;
+            transform: translate(-50%, 0);
+            background-color: #ff0000;
+            color: #fff;
+            padding: 10px;
+            border: 2px solid #fff;
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
         `;
-        document.body.appendChild(errorText);
+        document.body.appendChild(this.errorText);
         setTimeout(() => {
-            errorText.remove();
-
+            if (this.errorText) {
+                this.errorText.remove();
+                this.errorText = null;
+            }
         }, 7000);
     }
 
     displaySuccess(successMessage) {
-
-        const successText = document.createElement('p');
-        successText.textContent = successMessage;
-        successText.style.cssText = `
+        if (this.successText) {
+            this.successText.remove();
+        }
+        this.successText = document.createElement('p');
+        this.successText.textContent = successMessage;
+        this.successText.style.cssText = `
             position: absolute;
             left: 50%;
             top: 10%;
@@ -163,12 +179,12 @@ export default class Registro extends Phaser.Scene {
             width: 300px;
             text-align: center;
         `;
-        document.body.appendChild(successText);
+        document.body.appendChild(this.successText);
         setTimeout(() => {
-            successText.remove();
+            if (this.successText) {
+                this.successText.remove();
+                this.successText = null;
+            }
         }, 7000);
     }
-
-    
 }
-

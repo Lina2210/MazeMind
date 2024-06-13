@@ -197,6 +197,50 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
+//guardar puntuacion en la base de datos
+app.post('/saveScore', (req, res) => {
+    const { username, score, timeElapsed } = req.body;
+
+    const query = `
+        INSERT INTO Games (user_id, score)
+        SELECT user_id, ?
+        FROM Users
+        WHERE username = ?
+    `;
+
+    connection.query(query, [score, username], (err, result) => {
+        if (err) {
+            console.error('Error al guardar la puntuación:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        console.log('Puntuación guardada correctamente');
+        return res.status(200).json({ message: 'Puntuación guardada correctamente' });
+    });
+});
+
+// Ruta para obtener puntajes del usuario actual
+app.get('/scores', (req, res) => {
+    console.log("entro al get scores")
+    const username = req.query.username; // Recibe el nombre de usuario desde Phaser
+    console.log(username)
+    // Consulta SQL para obtener los puntajes del usuario
+    const sql = `
+        SELECT Games.score, Games.created_at
+        FROM Games
+        JOIN Users ON Games.user_id = Users.user_id
+        WHERE Users.username = 'Thiago'
+        ORDER BY Games.score DESC
+    `;
+
+    connection.query(sql, [username], (err, results) => {
+        if (err) {
+        throw err;
+        }
+        res.json(results); // Envía los resultados como JSON
+    });
+});
+  
+
 
 // Inicia el servidor en el puerto 3000
 app.listen(PORT, () => {
